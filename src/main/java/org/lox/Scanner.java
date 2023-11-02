@@ -1,11 +1,11 @@
-package org.example;
+package org.lox;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.example.TokenType.*;
+import static org.lox.TokenType.*;
 
 public class Scanner {
 
@@ -186,7 +186,7 @@ public class Scanner {
 //        para pular a  ultima -> "
         advance();
 
-        String value = source.substring(start + 1, current + 1);
+        String value = source.substring(start + 1, current - 1);
         addToken(STRING, value);
     }
 
