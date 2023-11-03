@@ -1,4 +1,4 @@
-package org.lox;
+package org.interprete.lox;
 
 public class Token {
 

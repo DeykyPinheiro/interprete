@@ -1,5 +1,7 @@
 package org.lox;
 
+import org.interprete.lox.Token;
+
 public abstract class Expr {
 
     static class Binary extends Expr {
