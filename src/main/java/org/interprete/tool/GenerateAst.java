@@ -8,15 +8,15 @@ import java.util.List;
 // provalmente o autor do livro escreveu esse scritp pq não existiam records na epoca
 public class GenerateAst {
 
-//    ta funcionando até então, só que preico por o caminho na mao em outputDir
+    //    ta funcionando até então, só que preico por o caminho na mao em outputDir
 //    vou melhorar depois ou talvez ele mostre isso ainda
     public static void main(String[] args) throws Exception {
 //        if (args.length != 1) {
 //            System.err.println("Usage: generate_ast <output directory>");
 //            System.exit(64);
 //        }
-//        String outputDir = args[0];
-        String outputDir = "./src/main/java/org/interprete/teste";
+        String outputDir = args[0];
+//        String outputDir = "./src/main/java/org/interprete/teste";
 
         defineAst(outputDir, "Expr", Arrays.asList(
                 "Binary   : Expr left, Token operator, Expr right",
@@ -41,6 +41,8 @@ public class GenerateAst {
         writer.println();
         writer.println("abstract class " + baseName + " {");
 
+        defineVisitor(writer, baseName, types);
+
 
 //        incricao da arvore
         for (String type : types) {
@@ -55,6 +57,20 @@ public class GenerateAst {
         writer.close();
     }
 
+    private static void defineVisitor(
+            PrintWriter writer, String baseName, List<String> types) {
+
+        writer.println("  interface Visitor<R> {");
+
+
+        for (String type : types) {
+            String typeName = type.split(":")[0].trim();
+            writer.println("    R visit" + typeName + baseName + "(" +
+                    typeName + " " + baseName.toLowerCase() + ");");
+        }
+        writer.println("  }");
+    }
+
     private static void defineType(PrintWriter writer, String baseName,
                                    String className, String fieldList) {
 
@@ -64,6 +80,15 @@ public class GenerateAst {
 
 //        construtor da class
         writer.println("    " + className + "(" + fieldList + ") {");
+
+
+//        padrao visitor
+        writer.println();
+        writer.println("    @Override");
+        writer.println("    <R> R accept(Visitor<R> visitor) {");
+        writer.println("      return visitor.visit" +
+                className + baseName + "(this);");
+        writer.println("    }");
 
 //        guardar lista de campos
         String[] fields = fieldList.split(",");
