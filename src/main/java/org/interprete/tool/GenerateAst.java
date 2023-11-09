@@ -16,7 +16,7 @@ public class GenerateAst {
 //            System.exit(64);
 //        }
         String outputDir = args[0];
-//        String outputDir = "./src/main/java/org/interprete/teste";
+//        String outputDir = "./src/main/java/org/interprete/lox";
 
         defineAst(outputDir, "Expr", Arrays.asList(
                 "Binary   : Expr left, Token operator, Expr right",
@@ -52,6 +52,10 @@ public class GenerateAst {
             defineType(writer, baseName, className, fields);
         }
 
+        // The base accept() method.
+        writer.println();
+        writer.println("  abstract <R> R accept(Visitor<R> visitor);");
+
 
         writer.println("}");
         writer.close();
@@ -82,21 +86,21 @@ public class GenerateAst {
         writer.println("    " + className + "(" + fieldList + ") {");
 
 
-//        padrao visitor
+//        guardar lista de campos
+        String[] fields = fieldList.split(",");
+        for (String field : fields) {
+            String name = field.trim().split(" ")[1];
+            writer.println("      this." + name + " = " + name + ";");
+        }
+
+        writer.println("    }");
+
+        //        padrao visitor
         writer.println();
         writer.println("    @Override");
         writer.println("    <R> R accept(Visitor<R> visitor) {");
         writer.println("      return visitor.visit" +
                 className + baseName + "(this);");
-        writer.println("    }");
-
-//        guardar lista de campos
-        String[] fields = fieldList.split(",");
-        for (String field : fields) {
-            String name = field.split(" ")[1];
-            writer.println("      this." + name + " = " + name + ";");
-        }
-
         writer.println("    }");
 
         // cada variavel
