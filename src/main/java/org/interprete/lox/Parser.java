@@ -7,6 +7,10 @@ import static org.interprete.lox.TokenType.*;
 
 public class Parser {
 
+    private static class ParseError extends RuntimeException {
+
+    }
+
     private List<Token> tokens = new ArrayList<>();
 
     private int current = 0;
@@ -30,6 +34,7 @@ public class Parser {
             Expr right = comparison();
             expr = new Expr.Binary(expr, operator, right);
         }
+        return expr;
     }
 
     private Expr comparison() {
@@ -63,7 +68,7 @@ public class Parser {
         while (match(SLASH, STAR)) {
             Token operator = previous();
             Expr right = unary();
-            expr = Expr.Binary(expr, operator, right);
+            expr = new Expr.Binary(expr, operator, right);
         }
 
         return expr;
@@ -94,7 +99,7 @@ public class Parser {
             return new Expr.Literal(previous().literal);
         }
 
-        if (match(LEFT_PAREN)){
+        if (match(LEFT_PAREN)) {
             Expr expr = expression();
             consume(RIGHT_PAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
@@ -111,6 +116,12 @@ public class Parser {
             }
         }
         return false;
+    }
+
+    private Token consume(TokenType type, String message) {
+        if (check(type)) return advance();
+
+        throw error(peek(), message);
     }
 
     private Boolean check(TokenType type) {
@@ -135,5 +146,10 @@ public class Parser {
 
     private Token previous() {
         return tokens.get(current - 1);
+    }
+
+    private ParseError error(Token token, String message) {
+        Lox.error(token, message);
+        return new ParseError();
     }
 }
