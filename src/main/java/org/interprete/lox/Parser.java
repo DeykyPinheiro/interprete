@@ -8,7 +8,6 @@ import static org.interprete.lox.TokenType.*;
 public class Parser {
 
     private static class ParseError extends RuntimeException {
-
     }
 
     private List<Token> tokens = new ArrayList<>();
@@ -20,12 +19,22 @@ public class Parser {
         this.tokens = tokens;
     }
 
+    Expr parse() {
+        try {
+            return expression();
+        } catch (ParseError e) {
+            return null;
+        }
+    }
+
     private Expr expression() {
         return equality();
     }
 
     //    equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 //    em java a comparacao abaixo vira a seguinte funcao
+//    basicamente essa funcao ve se o primeiro elemento é umaa comparacao, se tiver
+//    mais comparacoes vai para o loop, isso funcionar nas funcoes abaixo e semelhante com ela
     private Expr equality() {
         Expr expr = comparison();
 
@@ -83,6 +92,8 @@ public class Parser {
         return primary();
     }
 
+//    aqui esta representada a ordem de precedencia das expressoes/ operacores,
+//    para operadores unarios
     private Expr primary() {
         if (match(FALSE)) {
             return new Expr.Literal(false);
@@ -104,6 +115,9 @@ public class Parser {
             consume(RIGHT_PAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
         }
+
+
+        throw error(peek(), "Expect expression.");
 
     }
 
@@ -151,5 +165,26 @@ public class Parser {
     private ParseError error(Token token, String message) {
         Lox.error(token, message);
         return new ParseError();
+    }
+
+    private void synchronize() {
+        advance();
+
+        while (!isAtEnd()) {
+            if (previous().type == SEMICOLON) return;
+
+            switch (peek().type) {
+                case CLASS:
+                case FUN:
+                case VAR:
+                case FOR:
+                case IF:
+                case WHILE:
+                case PRINT:
+                case RETURN:
+                    return;
+            }
+            advance();
+        }
     }
 }
